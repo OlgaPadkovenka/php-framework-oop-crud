@@ -110,8 +110,8 @@ $platforms = Platform::findAll();
                 </thead>
                 <tbody>
                     <?php foreach ($games as $game) : ?>
-                        <?php if (isset($_GET['edit']) && $_GET['edit'] === $game->getId()) : ?>
-                            <form method="post" action="actions/edit-game.php">
+                        <?php if (isset($_GET['edit']) && intval($_GET['edit']) === $game->getId()) : ?>
+                            <form method="post" action="edit.php">
                                 <input type="hidden" name="id" value="<?= $game->getId() ?>" />
                                 <tr>
                                     <th scope="row"><?= $game->getId() ?></th>
@@ -159,20 +159,24 @@ $platforms = Platform::findAll();
                                     <a href="<?= $game->getPlatform()->getLink() ?>" target="_blank"><?= $game->getPlatform()->getName() ?></a>
                                 </td>
                                 <td>
+                                    <!-- start update-->
                                     <form>
                                         <input type="hidden" name="edit" value="<?= $game->getId() ?>" />
                                         <button type="submit" class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     </form>
+                                    <!-- end update-->
                                 </td>
                                 <td>
-                                    <form method="post" action="actions/delete-game.php">
+                                    <!-- start delete-->
+                                    <form method="post" action="delete.php">
                                         <input type="hidden" name="id" value="<?= $game->getId() ?>" />
                                         <button type="submit" class="btn btn-danger btn-sm">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
+                                    <!-- end delete-->
                                 </td>
                             </tr>
                         <?php endif; ?>

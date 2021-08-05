@@ -52,6 +52,7 @@ $game->getReleaseDate()->format('Y-m-d') à index.php
      */
     protected \DateTime $releaseDate;
 
+//CREATE
 7. Je crée un fichier edit.php
 8. Je charge autoloader.
 <?php
@@ -159,5 +160,127 @@ On passe un objet Datetime à release_date, mais je vais envoyer la requette sql
 15. Si je remplis le formulaire, ca me redirige sur une page vide. Je fais la redirection dans edit.php
  header('Location: ./');
 
+ //Update
+ 16. Dans le formulaire pour faire un update, j'ai un input avec name="edit". Le formulaire est en get par défaut.
+   <!-- start update-->
+                                    <form>
+                                        <input type="hidden" name="edit" value="<?= $game->getId() ?>" />
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </form>
+                                    <!-- end update-->
 
+Cela me permet d'avoir un query quand je click sur le bouton d'update.
+videogames/?edit=
+J'ajoute un id dans value de game value="<?= $game->getId() ?>" 
+Le résultat: Par exemple, videogames/?edit=24
 
+17. Dans mon html, je dis que pour chaque jeu vidéo tu me fabrique une ligne de tableau: 
+<?php foreach ($games as $game) : ?>
+Ensuite, je dis s'il existe une valeur edit dans les paramètres GET et que ce paramètre $_GET["edit"] contient la même valeur que l'id du jeu, à ce moment-là, tu me fais un formulaire:
+
+18. Si je fais un dd à cet endoit
+ <?php foreach ($games as $game) : ?>
+                        <?php dd(['GET parameter' => $_GET['edit'], 'Game id' => $game->getId()]); ?>
+                        <?php if (isset($_GET['edit']) && $_GET['edit'] === $game->getId()) : ?>
+
+Je peux voir que GET parameter est une chaine de caractère, alors que un id est un nombre.
+^ array:2 [▼
+  "GET parameter" => "6"
+  "Game id" => 1
+]
+
+19. Dans la condition j'ajoute la fonction intval()
+ <?php if (isset($_GET['edit']) && intval($_GET['edit']) === $game->getId()) : ?>
+
+^ array:2 [▼
+  "GET parameter" => 6
+  "Game id" => 1
+]
+
+20. Je voudrais dire que s'il y a un id, je modifier un jeu, s'il n'y a pas d'id, je veux crée un jeu.
+  $id = null;
+    if (isset($_POST['id'])) {
+        $id = intval($_POST['id']);
+    }
+
+Si  $_POST['id'] existe, $id est égale à $_POST['id'] transformé en nombre. 
+
+21. 
+Dans ce cas la, je peux changer mon objet new Game dans edot.php
+de   $game = new Game(
+        null,
+        $_POST['title'],
+        $_POST['release_date'],
+        $_POST['link'],
+        $_POST['developer'],
+        $_POST['platform']
+    );
+
+à
+
+  $game = new Game(
+        $id,
+        $_POST['title'],
+        $_POST['release_date'],
+        $_POST['link'],
+        $_POST['developer'],
+        $_POST['platform']
+    );
+
+Je peux le tester en ajoutant un dd($game);
+ $game = new Game(
+        $id,
+        $_POST['title'],
+        $_POST['release_date'],
+        $_POST['link'],
+        $_POST['developer'],
+        $_POST['platform']
+    );
+    dd($game);
+
+  Si je crée un jeu, l'id est null, si je fais un update, l'id existe déjà.
+
+22. Je dis
+   // Si aucun ID n'a été envoyé dans les données de formulaire, c'est donc qu'on souhaite créer un nouveau jeu
+     if (is_null($id)) {
+         // Crée un nouvel enregistrement en base de données à partir des informations contenues dans l'objet
+         $game->create();
+     // Sinon, c'est qu'on souhaite modifier un jeu déjà existant
+     } else {
+         // Met à jour un enregistrement existant en base de données à partir des propriétés de cet objet
+         $game->update();
+     }
+
+23. Je crée une méthode update() dans Game.php
+
+  /**
+      * Met à jour un enregistrement existant en base de données à partir des propriétés de cet objet
+      *
+      * @return void
+      */
+     public function update()
+     {
+         // Configure une connexion au serveur de base de données
+         $databaseHandler = new \PDO('mysql:host=localhost;dbname=videogames', 'root', 'root');
+         // Crée un modèle de requête "à trous" dans lequel on pourra injecter des variables
+         $statement = $databaseHandler->prepare('UPDATE `game`
+             SET
+                 `title` = :title,
+                 `link` = :link,
+                 `release_date` = :release_date,
+                 `developer_id` = :developer_id,
+                 `platform_id` = :platform_id
+             WHERE `id` = :id
+         ');
+         // Exécute la requête en remplaçant chaque champ variable par la valeur associée dans le tableau
+         $statement->execute([
+             ':id' => $this->id,
+             ':title' => $this->title,
+             ':link' => $this->link,
+             ':release_date' => $this->releaseDate->format('Y-m-d H:i:s'),
+             ':developer_id' => $this->developerId,
+             ':platform_id' => $this->platformId,
+         ]);
+     }

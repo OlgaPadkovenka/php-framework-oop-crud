@@ -44,16 +44,65 @@ class Game extends AbstractModel
      */
     protected ?int $platformId;
 
+    /**
+     * Met à jour un enregistrement existant en base de données à partir des propriétés de cet objet
+     *
+     * @return void
+     */
+    public function update()
+    {
+        // Configure une connexion au serveur de base de données
+        $databaseHandler = new \PDO('mysql:host=localhost;dbname=videogames', 'root', 'root');
+        // Crée un modèle de requête "à trous" dans lequel on pourra injecter des variables
+        $statement = $databaseHandler->prepare('UPDATE `game`
+              SET
+                  `title` = :title,
+                  `link` = :link,
+                  `release_date` = :release_date,
+                  `developer_id` = :developer_id,
+                  `platform_id` = :platform_id
+              WHERE `id` = :id
+          ');
+        // Exécute la requête en remplaçant chaque champ variable par la valeur associée dans le tableau
+        $statement->execute([
+            ':id' => $this->id,
+            ':title' => $this->title,
+            ':link' => $this->link,
+            ':release_date' => $this->releaseDate->format('Y-m-d H:i:s'),
+            ':developer_id' => $this->developerId,
+            ':platform_id' => $this->platformId,
+        ]);
+    }
+
+
+    /**
+     * Crée un nouvel enregistrement en base de données à partir de cet objet
+     *
+     * @return void
+     */
     public function create()
     {
         // Configure une connexion au serveur de base de données
         $databaseHandler = new \PDO('mysql:host=localhost;dbname=videogames', 'root', 'root');
         // Crée un modèle de requête "à trous" dans lequel on pourra injecter des variables
-        $statement = $databaseHandler->prepare('INSERT INTO `game` (`title`, `link`,
-        `release_date`, `developer_id`, `platform_id`) VALUES (:title, :link, :release_date,
-        :developer_id, :platform_id)');
-
-        // Exécute la requête préparée en remplaçant chaque champ variable par le contenu reçu du champ correspondant dans le formulaire
+        $statement = $databaseHandler->prepare(
+            'INSERT INTO `game`
+              (
+                  `title`,
+                  `link`,
+                  `release_date`,
+                  `developer_id`,
+                  `platform_id`
+              )
+              VALUES (
+                  :title,
+                  :link,
+                  :release_date,
+                  :developer_id,
+                  :platform_id
+              )'
+        );
+        // Exécute la requête en remplaçant chaque champ variable par la valeur associée dans le tableau
         $statement->execute([
             ':title' => $this->title,
             ':link' => $this->link,
