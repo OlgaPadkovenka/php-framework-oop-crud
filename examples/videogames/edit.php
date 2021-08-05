@@ -46,15 +46,7 @@ try {
         $_POST['developer'],
         $_POST['platform']
     );
-    // Si aucun ID n'a été envoyé dans les données de formulaire, c'est donc qu'on souhaite créer un nouveau jeu
-    if (is_null($id)) {
-        // Crée un nouvel enregistrement en base de données à partir des informations contenues dans l'objet
-        $game->create();
-        // Sinon, c'est qu'on souhaite modifier un jeu déjà existant
-    } else {
-        // Met à jour un enregistrement existant en base de données à partir des propriétés de cet objet
-        $game->update();
-    }
+    $game->save();
 
     header('Location: ./');
 } catch (Exception $exception) {

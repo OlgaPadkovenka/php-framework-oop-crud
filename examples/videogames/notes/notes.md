@@ -334,3 +334,31 @@ Je peux le tester en ajoutant un dd($game);
              ':id' => $this->id
          ]);
      }
+
+26. Je voudrais fusionner la méthode create() et update().
+
+27. Je crée une nouvelle méthode save().
+
+28. Je fais la vérification, si l'objet a un id ou pas.
+
+   /**
+      * Répercute l'état actuel de l'objet sur un enregistrement en base de données
+      *
+      * @return void
+      */
+     public function save()
+     {
+         // Si aucun l'objet n'a pas d'idenitfiant, c'est donc qu'aucun enregistrement correspondant n'existe encore en base de données
+         if (is_null($this->id)) {
+             // Crée un nouvel enregistrement en base de données à partir des informations contenues dans l'objet
+             $this->create();
+         // Sinon, c'est donc qu'il existe déjà un enregistrement correspondant en base de données
+         } else {
+             // Met à jour un enregistrement existant en base de données à partir des propriétés de cet objet
+             $this->update();
+         }
+     }
+
+29. Dans edit.php je fais  $game->save();
+
+30. Les méthodes create() et update() je mes en  protected. Avant elles étaitent en public.
